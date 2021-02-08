@@ -1,11 +1,10 @@
 from setuptools import find_packages, setup
 
-pkg_name = 'optimizationalgorithmscomparison'
 
 setup(
-    name=pkg_name,
-    version='0.1.0',
-    packages=find_packages(include=[pkg_name], where='src'),
+    name='oac',
+    version='0.1.1',
+    packages=find_packages(include=['optimizationalgorithmscomparison'], where='src'),
     description='Optimization algorithms comparison library',
     author='Andrei Telbukhov',
     lisence='',
