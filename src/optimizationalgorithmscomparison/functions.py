@@ -1,4 +1,6 @@
 import numpy as np
+import matplotlib as mpl
+
 from abc import ABC, abstractmethod
 
 
@@ -43,62 +45,89 @@ class QuadraticFunction(Function):
 class OptimizationMethod(ABC):
 
     @abstractmethod
-    def run(self, x_0):
+    def run(self, fun, x_0, epsilon):
         pass
 
 
 class Newton(OptimizationMethod):
 
-    def __init__(self, fun, epsilon=1e-3):
-        self.fun = fun
-        self.epsilon = epsilon
+    def __init__(self, criterion=None, max_iteration=10):
+        self.criterion = criterion
+        self.max_iteration = max_iteration
+        self.name = "Newton method"
 
-    def run(self, x_0):
-        x_1 = x_0
-        x_2 = x_0 + 1000.
-        while np.linalg.norm(self.fun.evaluate(x_1) - self.fun.evaluate(x_2)) > self.epsilon:
+    def run(self, fun, x_0, epsilon):
+        x_1 = np.copy(x_0)
+        x_2 = np.copy(x_0) + 1000.
+        iteration = 0
+        while np.linalg.norm(fun.evaluate(x_1) - fun.evaluate(x_2)) > epsilon and iteration < self.max_iteration:
             x_2 = np.copy(x_1)
-            x_1 -= np.matmul(np.linalg.inv(self.fun.hessian(x_1)), self.fun.gradient(x_1))
+            x_1 -= np.matmul(np.linalg.inv(fun.hessian(x_1)), fun.gradient(x_1))
+            iteration += 1
 
-        return x_1
+        return x_1, iteration
 
 
 class GD(OptimizationMethod):
 
-    def __init__(self, fun, epsilon=1e-3, step=None):
-        self.fun = fun
-        self.epsilon = epsilon
+    def __init__(self, step=None, max_iteration=10):
+        self.max_iteration = max_iteration
         self.step = step
+        self.name = "Gradient descent method"
 
-    def run(self, x_0):
-        x_1 = x_0
-        x_2 = x_0 + 1000.
-        while np.linalg.norm(self.fun.evaluate(x_1) - self.fun.evaluate(x_2)) > self.epsilon:
+    def run(self, fun, x_0, epsilon):
+        x_1 = np.copy(x_0)
+        x_2 = np.copy(x_0) + 1000.
+        iteration = 0
+        while np.linalg.norm(fun.evaluate(x_1) - fun.evaluate(x_2)) > epsilon and iteration < self.max_iteration:
             x_2 = np.copy(x_1)
-            x_1 -= self.step * self.fun.gradient(x_1)
+            x_1 -= self.step * fun.gradient(x_1)
+            iteration += 1
 
-        return x_1
+        return x_1, iteration
 
 
 class CG(OptimizationMethod):
 
-    def __init__(self, fun, epsilon):
-        self.fun = fun
-        self.epsilon = epsilon
+    def __init__(self, max_iteration=10):
+        self.max_iteration = max_iteration
+        self.name = "Conjugate gradients method"
 
-    def run(self, x_0):
-        x_1 = x_0
-        x_2 = x_0 + 1000.
-        d = -self.fun.gradient(x_0)
+    def run(self, fun, x_0, epsilon):
+        x_1 = np.copy(x_0)
+        x_2 = np.copy(x_0) + 1000.
+        d = -1. * fun.gradient(x_0)
         r_1 = np.copy(d)
         r_2 = np.copy(d)
-        while np.linalg.norm(self.fun.evaluate(x_1) - self.fun.evaluate(x_2)) > self.epsilon:
+        iteration = 0
+        while np.linalg.norm(fun.evaluate(x_1) - fun.evaluate(x_2)) > epsilon and iteration < self.max_iteration:
             x_2 = np.copy(x_1)
-            alpha = np.matmul(r_1.T, r_1) / np.matmul(np.matmul(d.T, self.fun.a), d)
+            alpha = np.matmul(r_1.T, r_1) / np.matmul(np.matmul(d.T, fun.a), d)
             x_1 += alpha * d
-            r_2 -= alpha * np.matmul(self.fun.a, d)
+            r_2 -= alpha * np.matmul(fun.a, d)
             beta = np.matmul(r_2.T, r_2) / np.matmul(r_1.T, r_1)
             d = r_2 + beta * d
             r_1 = np.copy(r_2)
+            iteration += 1
 
-        return x_1
+        return x_1, iteration-1
+
+
+class StopCriterion:
+    ...
+
+
+def compare(methods, target, x_0, epsilon):
+    """
+    :param methods: list of optimization algorithms to compare
+    :param epsilon: accuracy
+    :param target: target function
+    :param x_0: starting point
+    """
+
+    for method in methods:
+        print(method.name, ":")
+        minimizer, iter_num = method.run(target, x_0, epsilon)
+        minimum = target.evaluate(minimizer)
+        print("Minimum of the function is", minimum[0][0], "reached at x =", minimizer, "on the iteration",
+              iter_num)
