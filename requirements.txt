@@ -4,3 +4,4 @@ numpy
 wheel
 twine
 matplotlib
+pandas
