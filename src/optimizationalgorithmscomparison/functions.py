@@ -169,7 +169,7 @@ def compare(methods, target, x_0, epsilon, stop_criterion, max_iteration=10):
     """
     plot_number = 1
 
-    cols = ['method', 'iterations', 'gradients', 'hessians', 'function minimum']
+    cols = ['method', 'iterations', 'gradient calculations', 'hessian calculations', 'function minimum']
     df = pd.DataFrame(columns=cols)
 
     for method in methods:
@@ -216,4 +216,5 @@ def compare(methods, target, x_0, epsilon, stop_criterion, max_iteration=10):
         plot_number += 1
 
     plt.show()
+    print('Statistics')
     print(df)
