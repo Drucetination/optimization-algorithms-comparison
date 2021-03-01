@@ -185,27 +185,27 @@ def compare(methods, target, x_0, epsilon, stop_criterion, max_iteration=10):
             d = -1 * target.gradient(x_0)
             gradients = 1
             r = np.copy(d)
-            i = 0
-            while (i < max_iteration) and (stop_criterion.criterion(x_1, x_2, epsilon)):
+            iteration = 0
+            while (iteration < max_iteration) and (stop_criterion.criterion(x_1, x_2, epsilon)):
                 x_2 = np.copy(x_1)
                 x_1, y, d, r = method.step(target, x_1, d, r)
                 y_data.append(y)
-                i += 1
+                iteration += 1
         else:
-            i = 0
-            while (i < max_iteration) and (stop_criterion.criterion(x_1, x_2, epsilon)):
+            iteration = 0
+            while (iteration < max_iteration) and (stop_criterion.criterion(x_1, x_2, epsilon)):
                 x_2 = np.copy(x_1)
                 x_1, y = method.step(target, x_1)
                 y_data.append(y)
-                i += 1
+                iteration += 1
 
-        iterations = range(i + 1)
+        iterations = range(iteration + 1)
         if method.name == "GD" or method.name == "Newton":
-            gradients = len(iterations)
+            gradients = iteration
         if method.name == "Newton":
-            hessians = len(iterations)
+            hessians = iteration
 
-        df_tmp = pd.DataFrame([[method.name, len(iterations), gradients, hessians, min(y_data)]], columns=cols)
+        df_tmp = pd.DataFrame([[method.name, iteration, gradients, hessians, min(y_data)]], columns=cols)
         df = df.append(df_tmp, ignore_index=True)
 
         plt.subplot(len(methods), 1, plot_number)
