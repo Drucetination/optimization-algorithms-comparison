@@ -11,7 +11,7 @@ setup(
     install_requires=[
         'numpy',
         'matplotlib',
-        'pandas'
+        'pandas>=1.2.0'
     ],
     package_dir={
         '': 'src',

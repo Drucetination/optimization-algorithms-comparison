@@ -4,4 +4,4 @@ numpy
 wheel
 twine
 matplotlib
-pandas
+pandas>=1.2.0
