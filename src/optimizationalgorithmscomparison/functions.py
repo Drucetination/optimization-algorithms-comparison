@@ -215,6 +215,7 @@ def compare(methods, target, x_0, epsilon, stop_criterion, max_iteration=10):
         plt.ylabel("Function value")
         plot_number += 1
 
+    plt.subplots_adjust(hspace=1.5)
     plt.show()
     print('Statistics')
     print(df)
