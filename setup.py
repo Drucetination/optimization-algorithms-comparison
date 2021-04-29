@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 
 setup(
     name='oac',
-    version='0.1.2',
+    version='0.1.3',
     packages=find_packages(include=['optimizationalgorithmscomparison'], where='src'),
     description='Optimization algorithms comparison library',
     author='Andrei Telbukhov',
