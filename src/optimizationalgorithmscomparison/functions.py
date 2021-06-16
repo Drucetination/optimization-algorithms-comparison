@@ -319,3 +319,22 @@ def compare(methods, target, x_0, epsilon, stop_criterion, max_iteration=10):
     ax.legend(loc='upper left')
 
     HTML(anim.to_html5_video())
+
+
+def iterative_visualization(fun, method, path, iterations_number):
+    """
+    Visualizes function value dependence on iteration number
+    :param fun: target function
+    :param method: optimization method
+    :param path: path of the optimization process
+    :param iterations_number: number of iterations
+    """
+    if iterations_number > len(path):
+        raise Exception('Iterations number must be equal or less than path length')
+    iterations = range(iterations_number)
+    values = [fun.evaluate(x) for x in path]
+    plt.plot(iterations, values)
+    plt.title(method.name + ' x_0 = ' + str(path[0]))
+    plt.xlabel("Iteration")
+    plt.ylabel("Function value")
+    plt.show()
