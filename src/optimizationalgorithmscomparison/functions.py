@@ -51,7 +51,7 @@ class QuadraticFunction(Function):
 class OptimizationMethod(ABC):
 
     @abstractmethod
-    def run(self, fun, x_0, epsilon):
+    def run(self, fun, x_0, stop_criterion):
         pass
 
     @abstractmethod
@@ -70,16 +70,19 @@ class Newton(OptimizationMethod):
         y = fun.evaluate(x)
         return x, y
 
-    def run(self, fun, x_0, epsilon):
-        x_1 = np.copy(x_0)
-        x_2 = np.copy(x_0) + 1000.
+    def run(self, fun, x_0, stop_criterion):
         iteration = 0
-        while np.linalg.norm(fun.evaluate(x_1) - fun.evaluate(x_2)) > epsilon and iteration < self.max_iteration:
+        path = []
+        y_data = []
+        x_1 = np.copy(x_0)
+        x_2 = np.copy(x_1) + 2 * stop_criterion.epsilon
+        while (iteration < self.max_iteration) and (stop_criterion.criterion(x_1, x_2)):
             x_2 = np.copy(x_1)
-            x_1 -= np.matmul(np.linalg.inv(fun.hessian(x_1)), fun.gradient(x_1))
+            x_1, y = self.step(fun, x_1)
+            path.append(reshape_for_plotting_2d(x_1))
+            y_data.append(y)
             iteration += 1
-
-        return x_1, iteration
+        return path, y_data
 
 
 class GD(OptimizationMethod):
@@ -94,16 +97,19 @@ class GD(OptimizationMethod):
         y = fun.evaluate(x)
         return x, y
 
-    def run(self, fun, x_0, epsilon):
-        x_1 = np.copy(x_0)
-        x_2 = np.copy(x_0) + 1000.
+    def run(self, fun, x_0, stop_criterion):
         iteration = 0
-        while np.linalg.norm(fun.evaluate(x_1) - fun.evaluate(x_2)) > epsilon and iteration < self.max_iteration:
+        path = []
+        y_data = []
+        x_1 = np.copy(x_0)
+        x_2 = np.copy(x_1) + 2 * stop_criterion.epsilon
+        while (iteration < self.max_iteration) and (stop_criterion.criterion(x_1, x_2)):
             x_2 = np.copy(x_1)
-            x_1 -= self.step_size * fun.gradient(x_1)
+            x_1, y = self.step(fun, x_1)
+            path.append(reshape_for_plotting_2d(x_1))
+            y_data.append(y)
             iteration += 1
-
-        return x_1, iteration
+        return path, y_data
 
 
 class CG(OptimizationMethod):
@@ -121,24 +127,21 @@ class CG(OptimizationMethod):
         y = fun.evaluate(x)
         return x, y, d, r_next
 
-    def run(self, fun, x_0, epsilon):
-        x_1 = np.copy(x_0)
-        x_2 = np.copy(x_0) + 1000.
-        d = -1. * fun.gradient(x_0)
-        r_1 = np.copy(d)
-        r_2 = np.copy(d)
+    def run(self, fun, x_0, stop_criterion):
+        d = -1 * fun.gradient(x_0)
+        r = np.copy(d)
         iteration = 0
-        while np.linalg.norm(fun.evaluate(x_1) - fun.evaluate(x_2)) > epsilon and iteration < self.max_iteration:
+        x_1 = x_0
+        x_2 = x_1 * stop_criterion.epsilon
+        path = []
+        y_data = []
+        while (iteration < self.max_iteration) and (stop_criterion.criterion(x_1, x_2)):
             x_2 = np.copy(x_1)
-            alpha = np.matmul(r_1.T, r_1) / np.matmul(np.matmul(d.T, fun.a), d)
-            x_1 += alpha * d
-            r_2 -= alpha * np.matmul(fun.a, d)
-            beta = np.matmul(r_2.T, r_2) / np.matmul(r_1.T, r_1)
-            d = r_2 + beta * d
-            r_1 = np.copy(r_2)
+            x_1, y, d, r = self.step(fun, x_1, d, r)
+            path.append(reshape_for_plotting_2d(x_1))
+            y_data.append(y)
             iteration += 1
-
-        return x_1, iteration - 1
+        return path, y_data
 
 
 class StopCriterion(ABC):
