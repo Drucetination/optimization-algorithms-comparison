@@ -37,7 +37,7 @@ class Newton(OptimizationMethod):
             path.append(reshape_for_plotting_2d(x_1))
             y_data.append(y)
             iteration += 1
-        return path, y_data
+        return path, y_data, iteration
 
 
 class GD(OptimizationMethod):
@@ -64,7 +64,7 @@ class GD(OptimizationMethod):
             path.append(reshape_for_plotting_2d(x_1))
             y_data.append(y)
             iteration += 1
-        return path, y_data
+        return path, y_data, iteration
 
 
 class CG(OptimizationMethod):
@@ -96,4 +96,4 @@ class CG(OptimizationMethod):
             path.append(reshape_for_plotting_2d(x_1))
             y_data.append(y)
             iteration += 1
-        return path, y_data
+        return path, y_data, iteration

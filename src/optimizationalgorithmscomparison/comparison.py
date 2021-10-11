@@ -8,14 +8,12 @@ from IPython.display import HTML
 from .utils import reshape_for_plotting_2d, TrajectoryAnimation3D
 
 
-def compare(methods, target, x_0, epsilon, stop_criterion, max_iteration=10):
+def compare(methods, target, x_0, stop_criterion):
     """
     :param methods: list of optimization algorithms to compare
     :param target: target function
-    :param epsilon: accuracy
     :param stop_criterion: stop criterion
     :param x_0: list of starting points
-    :param max_iteration: maximum number of iteration
     """
 
     plot_number = 1
@@ -35,42 +33,26 @@ def compare(methods, target, x_0, epsilon, stop_criterion, max_iteration=10):
 
     for method in methods:
         for x0 in x_0:
-            x_1 = np.copy(x0)
-            x_2 = x_1 + epsilon * 2
-            y_data = [target.evaluate(x_1)]
+            y_data = [target.evaluate(x0)]
 
             gradients = 0
             hessians = 0
 
-            if method.name == "CG":
-                d = -1 * target.gradient(x0)
-                gradients = 1
-                r = np.copy(d)
-                iteration = 0
-                while (iteration < max_iteration) and (stop_criterion.criterion(x_1, x_2, epsilon)):
-                    x_2 = np.copy(x_1)
-                    x_1, y, d, r = method.step(target, x_1, d, r)
-                    paths_[method.name + str(reshape_for_plotting_2d(x0))].append(reshape_for_plotting_2d(x_1))
-                    y_data.append(y)
-                    iteration += 1
-            else:
-                iteration = 0
-                while (iteration < max_iteration) and (stop_criterion.criterion(x_1, x_2, epsilon)):
-                    x_2 = np.copy(x_1)
-                    x_1, y = method.step(target, x_1)
-                    paths_[method.name + str(reshape_for_plotting_2d(x0))].append(reshape_for_plotting_2d(x_1))
-                    y_data.append(y)
-                    iteration += 1
+            y, path, number_of_iterations = method.run(target, x0, stop_criterion)
+
+            y_data.extend(y)
+            paths_[method.name + str(reshape_for_plotting_2d(x0))].extend(path)
 
             z_paths.append(np.array(y_data))
 
-            iterations = range(iteration + 1)
+            iterations = range(number_of_iterations + 1)
             if method.name == "GD" or method.name == "Newton":
-                gradients = iteration
+                gradients = number_of_iterations
             if method.name == "Newton":
-                hessians = iteration
+                hessians = number_of_iterations
 
-            df_tmp = pd.DataFrame([[method.name, x0, iteration, gradients, hessians, min(y_data)]], columns=cols)
+            df_tmp = pd.DataFrame([[method.name, x0, number_of_iterations, gradients, hessians, min(y_data)]],
+                                  columns=cols)
             df = df.append(df_tmp, ignore_index=True)
 
             plt.subplot(len(df), 1, plot_number)
