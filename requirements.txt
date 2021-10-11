@@ -4,4 +4,6 @@ numpy
 wheel
 twine
 matplotlib
-pandas>=1.2.0
+pandas
+ipython
+optimizationalgorithmscomparison
