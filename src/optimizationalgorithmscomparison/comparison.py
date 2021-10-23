@@ -38,7 +38,7 @@ def compare(methods, target, x_0, stop_criterion):
             gradients = 0
             hessians = 0
 
-            y, path, number_of_iterations = method.run(target, x0, stop_criterion)
+            path, y, number_of_iterations = method.run(target, x0, stop_criterion)
 
             y_data.extend(y)
             paths_[method.name + str(reshape_for_plotting_2d(x0))].extend(path)

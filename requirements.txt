@@ -6,4 +6,3 @@ twine
 matplotlib
 pandas
 ipython
-optimizationalgorithmscomparison
