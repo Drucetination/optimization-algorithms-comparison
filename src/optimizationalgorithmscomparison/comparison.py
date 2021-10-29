@@ -8,11 +8,10 @@ from IPython.display import HTML
 from .utils import reshape_for_plotting_2d, TrajectoryAnimation3D
 
 
-def compare(methods, target, x_0, stop_criterion):
+def compare(methods, target, x_0):
     """
     :param methods: list of optimization algorithms to compare
     :param target: target function
-    :param stop_criterion: stop criterion
     :param x_0: list of starting points
     """
 
@@ -38,7 +37,7 @@ def compare(methods, target, x_0, stop_criterion):
             gradients = 0
             hessians = 0
 
-            path, y, number_of_iterations = method.run(target, x0, stop_criterion)
+            path, y, number_of_iterations = method.run(target, x0, method.stop_criterion)
 
             y_data.extend(y)
             paths_[method.name + str(reshape_for_plotting_2d(x0))].extend(path)
@@ -131,11 +130,11 @@ def performance(target, points, solvers):
     for solver in solvers:
         for point in points:
             start = time.time()
-            solver.run(target, point, solver.stopCriterion)
+            solver.run(target, point)
             finish = time.time()
             results.append(finish - start)
 
     _, ax = plt.subplots()
-    ax.hist(results, n_bins=7, cumulative=False, color='#539caf')
-    ax.set_ylabel('Result')
+    ax.hist(results, cumulative=False, color='#539caf')
+    ax.set_ylabel('Result in seconds')
     ax.set_title('performance')

@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 class OptimizationMethod(ABC):
 
     @abstractmethod
-    def run(self, fun, x_0, stop_criterion):
+    def run(self, fun, x_0):
         pass
 
     @abstractmethod
@@ -16,22 +16,23 @@ class OptimizationMethod(ABC):
 
 class Newton(OptimizationMethod):
 
-    def __init__(self, max_iteration=10):
+    def __init__(self, stop_criterion, max_iteration=10):
         self.max_iteration = max_iteration
         self.name = "Newton"
+        self.stop_criterion = stop_criterion
 
     def step(self, fun, x_prev):
         x = x_prev - np.matmul(np.linalg.inv(fun.hessian(x_prev)), fun.gradient(x_prev))
         y = fun.evaluate(x)
         return x, y
 
-    def run(self, fun, x_0, stop_criterion):
+    def run(self, fun, x_0):
         iteration = 0
         path = []
         y_data = []
         x_1 = np.copy(x_0)
-        x_2 = np.copy(x_1) + 2 * stop_criterion.epsilon
-        while (iteration < self.max_iteration) and (stop_criterion.criterion(x_1, x_2)):
+        x_2 = np.copy(x_1) + 2 * self.stop_criterion.epsilon
+        while (iteration < self.max_iteration) and (self.stop_criterion.criterion(x_1, x_2)):
             x_2 = np.copy(x_1)
             x_1, y = self.step(fun, x_1)
             path.append(reshape_for_plotting_2d(x_1))
@@ -42,23 +43,24 @@ class Newton(OptimizationMethod):
 
 class GD(OptimizationMethod):
 
-    def __init__(self, step_size=1e-3, max_iteration=10):
+    def __init__(self, stop_criterion, step_size=1e-3, max_iteration=10):
         self.max_iteration = max_iteration
         self.step_size = step_size
         self.name = "GD"
+        self.stop_criterion = stop_criterion
 
     def step(self, fun, x_prev):
         x = x_prev - self.step_size * fun.gradient(x_prev)
         y = fun.evaluate(x)
         return x, y
 
-    def run(self, fun, x_0, stop_criterion):
+    def run(self, fun, x_0):
         iteration = 0
         path = []
         y_data = []
         x_1 = np.copy(x_0)
-        x_2 = np.copy(x_1) + 2 * stop_criterion.epsilon
-        while (iteration < self.max_iteration) and (stop_criterion.criterion(x_1, x_2)):
+        x_2 = np.copy(x_1) + 2 * self.stop_criterion.epsilon
+        while (iteration < self.max_iteration) and (self.stop_criterion.criterion(x_1, x_2)):
             x_2 = np.copy(x_1)
             x_1, y = self.step(fun, x_1)
             path.append(reshape_for_plotting_2d(x_1))
@@ -69,9 +71,10 @@ class GD(OptimizationMethod):
 
 class CG(OptimizationMethod):
 
-    def __init__(self, max_iteration=10):
+    def __init__(self, stop_criterion, max_iteration=10):
         self.max_iteration = max_iteration
         self.name = "CG"
+        self.stop_criterion = stop_criterion
 
     def step(self, fun, x_prev, d_prev, r_prev):
         alpha = np.matmul(r_prev.T, r_prev) / np.matmul(np.matmul(d_prev.T, fun.a), d_prev)
@@ -82,15 +85,15 @@ class CG(OptimizationMethod):
         y = fun.evaluate(x)
         return x, y, d, r_next
 
-    def run(self, fun, x_0, stop_criterion):
+    def run(self, fun, x_0):
         d = -1 * fun.gradient(x_0)
         r = np.copy(d)
         iteration = 0
         x_1 = x_0
-        x_2 = x_1 * stop_criterion.epsilon
+        x_2 = x_1 * self.stop_criterion.epsilon
         path = []
         y_data = []
-        while (iteration < self.max_iteration) and (stop_criterion.criterion(x_1, x_2)):
+        while (iteration < self.max_iteration) and (self.stop_criterion.criterion(x_1, x_2)):
             x_2 = np.copy(x_1)
             x_1, y, d, r = self.step(fun, x_1, d, r)
             path.append(reshape_for_plotting_2d(x_1))
