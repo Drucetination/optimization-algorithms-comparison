@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 from IPython.display import HTML
 from .utils import reshape_for_plotting_2d, TrajectoryAnimation3D
+from .Metrics import Metrics
 
 
 def compare(methods, target, x_0):
@@ -138,3 +139,17 @@ def performance(target, points, solvers):
     ax.hist(results, cumulative=False, color='#539caf')
     ax.set_ylabel('Result in seconds')
     ax.set_title('performance')
+
+
+def performance_ratio(solvers, evaluated_time, metric=Metrics.TIME):
+
+    results = []
+    if metric == Metrics.TIME:
+        for solver in solvers:
+            t_start = time.time()
+            solver.run()
+            t_finish = time.time()
+            results.append(t_finish - t_start)
+        return evaluated_time / min(results)
+
+
