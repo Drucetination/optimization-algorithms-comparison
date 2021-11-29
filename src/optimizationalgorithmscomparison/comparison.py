@@ -141,15 +141,34 @@ def performance(target, points, solvers):
     ax.set_title('performance')
 
 
-def performance_ratio(solvers, evaluated_time, metric=Metrics.TIME):
+def performance_ratio(target, points, solvers, evaluated_time, metrics=None):
+    """
+        Calculates the performance ratio for chosen solvers and metrics
+        :param target: target function
+        :param points: list of starting points
+        :param solvers: list of solvers
+        :param evaluated_time result for comparing
+        :param metrics: list of metrics 
+        """
 
+    if metrics is None:
+        metrics = [Metrics.TIME]
     results = []
-    if metric == Metrics.TIME:
+    if metrics == Metrics.TIME:
         for solver in solvers:
             t_start = time.time()
             solver.run()
             t_finish = time.time()
             results.append(t_finish - t_start)
         return evaluated_time / min(results)
+    elif metrics == Metrics.RADIUS:
+        pass
+    elif metrics == Metrics.TIME_AND_RADIUS:
+        pass
+    elif metrics == Metrics.GRADIENT_NORM:
+        pass
+    elif metrics == Metrics.FUNCTION_VALUE:
+        pass
+
 
 
