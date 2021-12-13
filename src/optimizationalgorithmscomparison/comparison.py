@@ -141,34 +141,41 @@ def performance(target, points, solvers):
     ax.set_title('performance')
 
 
-def performance_ratio(target, points, solvers, evaluated_time, metrics=None):
+def performance_ratio(targets, point, solvers, metrics=None, metric_value=None):
     """
         Calculates the performance ratio for chosen solvers and metrics
-        :param target: target function
-        :param points: list of starting points
+        :param metric_value: target value of a metric
+        :param targets: list of target functions
+        :param point: starting point
         :param solvers: list of solvers
-        :param evaluated_time result for comparing
+        :param metric_value: value to compare with
         :param metrics: list of metrics 
         """
 
     if metrics is None:
         metrics = [Metrics.TIME]
+        metric_value = 1  # todo think about this value
     results = []
-    if metrics == Metrics.TIME:
-        for solver in solvers:
-            t_start = time.time()
-            solver.run()
-            t_finish = time.time()
-            results.append(t_finish - t_start)
-        return evaluated_time / min(results)
-    elif metrics == Metrics.RADIUS:
-        pass
-    elif metrics == Metrics.TIME_AND_RADIUS:
-        pass
-    elif metrics == Metrics.GRADIENT_NORM:
-        pass
-    elif metrics == Metrics.FUNCTION_VALUE:
-        pass
+    for solver in solvers:
+        for target in targets:
+            for metric in metrics:
+                if metric == Metrics.TIME:
+                    t_start = time.time()
+                    solver.run(target, point)
+                    t_finish = time.time()
+                    results.append(t_finish - t_start)
+                    return metric_value / min(results)
+                elif metric == Metrics.GRADIENT_NORM:
+                    path, y_data, iteration = solver.run(target, point)
+                    results.append(np.linalg.norm(np.array(target.gradient(path[-1]))))
+                    return metric_value / min(results)
+                elif metric == Metrics.FUNCTION_VALUE:
+                    path, y_data, iteration = solver.run(target, point)
+                    results.append(y_data)
+                    return metric_value / min(results)
+                elif metric == Metrics.RADIUS:
+                    pass
+                elif metric == Metrics.TIME_AND_RADIUS:
+                    pass
 
-
-
+                # todo add visualization for performance profiles
