@@ -141,22 +141,35 @@ def performance(target, points, solvers):
     ax.set_title('performance')
 
 
-def performance_profiles(targets, point, solvers, metrics=None, metric_values=None):
+def performance_profiles_visual(ratios, metrics, factors=range(1, 11)):
+    for metric in metrics:
+        for method in ratios:
+            probability = [sum(map(lambda x: x <= factor, ratios[method])) / len(ratios[method]) for factor in factors]
+            plt.step(factors, probability, label=method.name)
+        plt.legend()
+        plt.xlabel(r'$\tau$')
+        plt.ylabel(r'$P(r_{p,s}<=\tau)$')
+        plt.title(metric)
+        plt.show()
+
+
+def performance_profiles(targets, point, solvers, factors=range(1, 11), metrics=None, metric_values=None):
     """
         Calculates the performance ratio for chosen solvers and metrics
+        :param factors: factors to build profiles
         :param metric_values: target value of metrics
         :param targets: list of target functions
         :param point: starting point
         :param solvers: list of solvers
-        :param metric_value: value to compare with
+        :param metric_values: values to compare with (for each metric)
         :param metrics: list of metrics 
         """
 
     if metrics is None:
         metrics = [Metrics.TIME]
-        metric_values = 1  # todo think about this value
+        metric_values = dict.fromkeys([metrics], None)  # todo think about this value
     names = [solver.name for solver in solvers]
-    ratios = dict.fromkeys(names, [])
+    ratios = dict.fromkeys(metrics, dict.fromkeys(names, []))
     results = dict.fromkeys(metrics, [])
     for solver in solvers:
         for target in targets:
@@ -166,4 +179,14 @@ def performance_profiles(targets, point, solvers, metrics=None, metric_values=No
             results[Metrics.TIME].append(t_finish - t_start)
             results[Metrics.GRADIENT_NORM].append(np.linalg.norm(np.array(target.gradient(path[-1]))))
             results[Metrics.FUNCTION_VALUE].append(y_data)
-        ratios[solver.name].append(metric_values / min(results))
+
+    #     ratios[metric.name].append(metric_values / min(results))
+    # for r in ratios.values():
+    #     plt.step(factors, y_new, label=method_1.name)
+    #     plt.step(tau, y2_new, label=method_2.name)
+    #     plt.legend()
+    #     plt.xlabel(r'$\tau$')
+    #     plt.ylabel(r'$P(r_{p,s}<=\tau)$')
+    #     plt.title('metric = TIME')
+    #     plt.show()
+    # todo
