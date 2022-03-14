@@ -4,7 +4,7 @@ from .noises import NoiseType, Noise
 from numpy import random
 
 
-class Function(ABC):
+class TargetFunction(ABC):
 
     @abstractmethod
     def evaluate(self, x, noise):
@@ -15,11 +15,11 @@ class Function(ABC):
         pass
 
     @abstractmethod
-    def hessian(self, noise):
+    def hessian(self, x):
         pass
 
 
-class QuadraticFunction(Function):
+class QuadraticFunction(TargetFunction):
 
     def __init__(self, a, b, c):
         self.a = a
@@ -32,10 +32,13 @@ class QuadraticFunction(Function):
         else:
             y = (0.5 * self.a * x ** 2 + self.b * x + self.c)[0][0]
         if noise is not None:
-            if noise.noise_type == NoiseType.ADDITIVE_GAUSSIAN:
-                return y + np.random.randn()
-            elif noise.noise_type == NoiseType.MULTIPLICATIVE_GAUSSIAN:
-                return y * np.random.randn()
+            if noise.distribution == "gaussian":
+                if noise.noise_type == NoiseType.ADDITIVE:
+                    return y + np.random.randn()
+                elif noise.noise_type == NoiseType.MULTIPLICATIVE:
+                    return y * np.random.randn()
+            elif noise.distribution == "cauchy":
+                pass
         else:
             return y
 
@@ -56,7 +59,7 @@ class QuadraticFunction(Function):
         y = self.a
 
 
-class RosenbrockFunction(Function):
+class RosenbrockFunction(TargetFunction):
 
     def evaluate(self, x, noise=None):
         y = 0
@@ -69,7 +72,6 @@ class RosenbrockFunction(Function):
                 return y * np.random.randn()
         else:
             return y
-
 
     def gradient(self, x, noise=None):
         y = np.zeros_like(x)

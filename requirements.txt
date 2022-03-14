@@ -6,3 +6,4 @@ twine
 matplotlib
 pandas
 ipython
+pade
